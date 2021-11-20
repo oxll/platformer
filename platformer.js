@@ -49,7 +49,7 @@ class Player {
     this.glide = 0.5;
     this.maxXVel = 5;
     this.jump = 9;
-    this.gravity = 0.4;
+    this.gravity = 0.625;
     this.terminalVel = 12;
     this.isGrounded = false;
     this.swimming = false;
