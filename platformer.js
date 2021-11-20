@@ -84,7 +84,7 @@ class Player {
 
     this.y += this.yVel;
 
-    const deaccelerator = this.isGrounded ? 2 : 1.17;
+    const deaccelerator = this.isGrounded ? 1.25 : 1.125;
 
     this.xVel /= deaccelerator;
 
