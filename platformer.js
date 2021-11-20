@@ -88,8 +88,6 @@ class Player {
 
     this.xVel *= deaccelerator;
 
-    this.yVel *= deaccelerator;
-
     this.yVel += this.gravity;
 
     if (this.y > sHeight - 100) {
