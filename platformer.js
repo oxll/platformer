@@ -11,6 +11,8 @@ const keysHeld = {};
 window.addEventListener("keydown", (event) => (keysHeld[event.key] = true));
 window.addEventListener("keyup", (event) => delete keysHeld[event.key]);
 
+document.addEventListener("contextmenu", (event) => event.preventDefault());
+
 function rect(x, y, rectWidth, rectHeight) {
   context.fillRect(
     x - rectWidth / 2,
@@ -20,19 +22,27 @@ function rect(x, y, rectWidth, rectHeight) {
   );
 }
 
-function isColliding(obj1, obj2) {
-  return (
-    this.x + this.w / 2 > p.x - p.w / 2 &&
-    this.x - this.w / 2 < p.x + p.w / 2 &&
-    this.y + this.h / 2 > p.y - p.h / 2 &&
-    this.y - this.h / 2 < p.y + p.h / 2
-  );
+function isCollidingLeft(obj1, obj2) {
+  return obj1.x - obj1.width / 2 < obj2.x + obj2.width / 2;
+}
+
+function isCollidingRight(obj1, obj2) {
+  return obj1.x + obj1.width / 2 > obj2.x - obj2.width / 2;
+}
+
+function isCollidingTop(obj1, obj2) {
+  return obj1.y - obj1.height / 2 < obj2.y + obj2.height / 2;
+}
+
+function isCollidingBottom(obj1, obj2) {
+  return obj1.y + obj1.height / 2 > obj2.y - obj2.height / 2;
 }
 
 function tick() {
   context.clearRect(0, 0, sWidth, sHeight);
-  genesis.update();
-  genesis.render();
+  player.update();
+  player.render();
+  platform.render();
   requestAnimationFrame(tick);
 }
 
@@ -68,6 +78,8 @@ class Player {
       this.yVel -= this.jump;
     }
 
+    const deaccelerator = this.isGrounded ? 1.25 : 1.125;
+
     this.isGrounded = false;
 
     if (this.xVel > this.maxXVel) {
@@ -80,11 +92,34 @@ class Player {
       this.yVel = this.terminalVel;
     }
 
+    if (isCollidingLeft(this, platform)) {
+      this.xVel = 0;
+      this.x = platform.x + platform.width / 2 + this.width / 2;
+      console.log(0);
+    }
+
+    if (isCollidingRight(this, platform)) {
+      this.xVel = 0;
+      this.x = platform.x - platform.width / 2 - this.width / 2;
+      console.log(1);
+    }
+
+    if (isCollidingTop(this, platform)) {
+      this.yVel = 0;
+      this.y = platform.y + platform.height / 2 + this.height / 2;
+      console.log(2);
+    }
+
+    if (isCollidingBottom(this, platform)) {
+      this.yVel = 0;
+      this.y = platform.y - platform.height / 2 - this.height / 2;
+      this.isGrounded = true;
+      console.log(3);
+    }
+
     this.x += this.xVel;
 
     this.y += this.yVel;
-
-    const deaccelerator = this.isGrounded ? 1.25 : 1.125;
 
     this.xVel /= deaccelerator;
 
@@ -100,10 +135,25 @@ class Player {
   render() {
     context.fillStyle = this.color;
     rect(this.x, this.y, this.width, this.height);
+    console.log(this.x, this.y);
   }
 }
 
-let genesis = new Player(
+class Platform {
+  constructor(x, y, width, height) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+  }
+
+  render() {
+    context.fillStyle = "#333333";
+    rect(this.x, this.y, this.width, this.height);
+  }
+}
+
+let player = new Player(
   sWidth / 2,
   sHeight / 2,
   25,
@@ -116,5 +166,7 @@ let genesis = new Player(
   },
   "#000000"
 );
+
+let platform = new Platform(sWidth / 2, sHeight - 100, sWidth / 2, 20);
 
 tick();
