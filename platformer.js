@@ -22,27 +22,36 @@ function rect(x, y, rectWidth, rectHeight) {
   );
 }
 
-function isCollidingLeft(obj1, obj2) {
-  return obj1.x - obj1.width / 2 < obj2.x + obj2.width / 2;
+function isInHitbox(x, y, hitbox) {
+  return (
+    x > hitbox.x - hitbox.width / 2 &&
+    x < hitbox.x + hitbox.width / 2 &&
+    y > hitbox.y - hitbox.height / 2 &&
+    y < hitbox.y + hitbox.height / 2
+  );
 }
 
-function isCollidingRight(obj1, obj2) {
-  return obj1.x + obj1.width / 2 > obj2.x - obj2.width / 2;
-}
+function checkSide(staticValue, dynamicValue, isYStatic, hitbox) {
+  const SPACING = player.width * 0.3;
+  let points = [
+    [staticValue, dynamicValue],
+    [staticValue, dynamicValue + SPACING],
+    [staticValue, dynamicValue - SPACING],
+  ];
 
-function isCollidingTop(obj1, obj2) {
-  return obj1.y - obj1.height / 2 < obj2.y + obj2.height / 2;
-}
+  if (isYStatic) {
+    points = points.map((point) => point.reverse());
+  }
 
-function isCollidingBottom(obj1, obj2) {
-  return obj1.y + obj1.height / 2 > obj2.y - obj2.height / 2;
+  return points.some((point) => isInHitbox(...point, hitbox));
 }
 
 function tick() {
   context.clearRect(0, 0, sWidth, sHeight);
   player.update();
   player.render();
-  platform.render();
+  platforms.forEach((platform) => platform.render());
+
   requestAnimationFrame(tick);
 }
 
@@ -92,30 +101,7 @@ class Player {
       this.yVel = this.terminalVel;
     }
 
-    if (isCollidingLeft(this, platform)) {
-      this.xVel = 0;
-      this.x = platform.x + platform.width / 2 + this.width / 2;
-      console.log(0);
-    }
-
-    if (isCollidingRight(this, platform)) {
-      this.xVel = 0;
-      this.x = platform.x - platform.width / 2 - this.width / 2;
-      console.log(1);
-    }
-
-    if (isCollidingTop(this, platform)) {
-      this.yVel = 0;
-      this.y = platform.y + platform.height / 2 + this.height / 2;
-      console.log(2);
-    }
-
-    if (isCollidingBottom(this, platform)) {
-      this.yVel = 0;
-      this.y = platform.y - platform.height / 2 - this.height / 2;
-      this.isGrounded = true;
-      console.log(3);
-    }
+    platforms.forEach((platform) => handleCollisions(this, platform));
 
     this.x += this.xVel;
 
@@ -135,7 +121,6 @@ class Player {
   render() {
     context.fillStyle = this.color;
     rect(this.x, this.y, this.width, this.height);
-    console.log(this.x, this.y);
   }
 }
 
@@ -153,6 +138,32 @@ class Platform {
   }
 }
 
+function handleCollisions(player, platform) {
+  // checks left
+  if (checkSide(player.x - player.width / 2, player.y, false, platform)) {
+    player.x = platform.x + platform.width / 2 + player.width / 2;
+    player.xVel = 0;
+  }
+  // checks right
+  if (checkSide(player.x + player.width / 2, player.y, false, platform)) {
+    player.x = platform.x - platform.width / 2 - player.width / 2;
+    player.xVel = 0;
+  }
+  // checks top
+  if (checkSide(player.y - player.height / 2, player.x, true, platform)) {
+    player.y = platform.y + platform.height / 2 + player.height / 2;
+    player.yVel = 0;
+  }
+  // checks bottom
+  if (checkSide(player.y + player.height / 2, player.x, true, platform)) {
+    player.y = platform.y - platform.height / 2 - player.height / 2;
+    player.yVel = 0;
+    player.isGrounded = true;
+  }
+}
+
+var platforms = [new Platform(sWidth / 2, sHeight - 150, sWidth / 2, 50)];
+
 let player = new Player(
   sWidth / 2,
   sHeight / 2,
@@ -166,7 +177,5 @@ let player = new Player(
   },
   "#000000"
 );
-
-let platform = new Platform(sWidth / 2, sHeight - 100, sWidth / 2, 20);
 
 tick();
