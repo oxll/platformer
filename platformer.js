@@ -162,7 +162,10 @@ function handleCollisions(player, platform) {
   }
 }
 
-var platforms = [new Platform(sWidth / 2, sHeight - 150, sWidth / 2, 50)];
+var platforms = [
+  new Platform(sWidth / 2, sHeight - 150, sWidth / 2, 50),
+  new Platform(sWidth * 0.25, sHeight - 200, sWidth / 3, 10),
+];
 
 let player = new Player(
   sWidth / 2,
