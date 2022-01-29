@@ -24,6 +24,10 @@ let keysHeld = {};
 window.addEventListener("keydown", (event) => (keysHeld[event.key] = true));
 window.addEventListener("keyup", (event) => delete keysHeld[event.key]);
 
+function isKeyHeld(controlName) {
+  return player.controls[controlName].some((x) => keysHeld[x]);
+}
+
 document.addEventListener("contextmenu", (event) => event.preventDefault());
 
 function rect(x, y, rectWidth, rectHeight) {
@@ -99,19 +103,19 @@ function handleSwimming(water, player) {
   if (isInHitbox(player.x, player.y, water)) {
     player.gravity = 0;
     player.isGrounded = false;
-    player.yVel = 1;
-
     let playerSpeed = 1;
-    if (keysHeld[player.controls.left]) {
+    player.yVel = playerSpeed;
+
+    if (isKeyHeld("left")) {
       player.xVel = -playerSpeed;
     }
-    if (keysHeld[player.controls.right]) {
+    if (isKeyHeld("right")) {
       player.xVel = playerSpeed;
     }
-    if (keysHeld[player.controls.up]) {
+    if (isKeyHeld("up")) {
       player.yVel = -playerSpeed;
     }
-    if (keysHeld[player.controls.down]) {
+    if (isKeyHeld("down")) {
       player.yVel = playerSpeed * 2;
     }
   } else {
@@ -120,6 +124,27 @@ function handleSwimming(water, player) {
 }
 
 function handleBurning(lava, player) {
+  if (isInHitbox(player.x, player.y, lava)) {
+    player.gravity = 0;
+    player.isGrounded = false;
+    let playerSpeed = 0.375;
+    player.yVel = playerSpeed;
+
+    if (isKeyHeld("left")) {
+      player.xVel = -playerSpeed;
+    }
+    if (isKeyHeld("right")) {
+      player.xVel = playerSpeed;
+    }
+    if (isKeyHeld("up")) {
+      player.yVel = -playerSpeed;
+    }
+    if (isKeyHeld("down")) {
+      player.yVel = playerSpeed * 2;
+    }
+  } else {
+    player.gravity = 0.625;
+  }
   /*
     update(players) {
     for (var i = 0; i < players.length; i++) {
@@ -135,7 +160,7 @@ function handleBurning(lava, player) {
 
 let platforms = [
   // base platform
-  new Platform(sWidth / 2, sHeight - 150, sWidth, 10),
+  new Platform(sWidth / 2, sHeight - 125, sWidth, 50),
 
   // walls
   new Platform(50, sHeight / 2, 10, sHeight),
@@ -145,9 +170,9 @@ let platforms = [
   new Platform(sWidth * 0.25, sHeight - 200, sWidth / 3, 10),
 ];
 
-let waters = [new Water(sWidth / 2, sHeight - 200, 50, 50)];
+let waters = [new Water(sWidth / 3 + 250, sHeight - 500, 375, 750)];
 
-let lavas = [new Lava(sWidth / 2 + 100, sHeight - 200, 50, 50)];
+let lavas = [new Lava(2 * (sWidth / 3) + 250, sHeight - 500, 375, 750)];
 
 let player = new Player(
   sWidth / 2,
@@ -155,10 +180,10 @@ let player = new Player(
   25,
   25,
   {
-    left: "ArrowLeft",
-    right: "ArrowRight",
-    up: "ArrowUp",
-    down: "ArrowDown",
+    left: ["a", "ArrowLeft"],
+    right: ["d", "ArrowRight"],
+    up: ["w", "ArrowUp"],
+    down: ["s", "ArrowDown"],
   },
   "#000000"
 );

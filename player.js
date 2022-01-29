@@ -18,15 +18,15 @@ class Player {
   }
 
   update() {
-    if (keysHeld[this.controls.left]) {
+    if (isKeyHeld("left")) {
       this.xVel -= 0.5;
     }
 
-    if (keysHeld[this.controls.right]) {
+    if (isKeyHeld("right")) {
       this.xVel += 0.5;
     }
 
-    if (keysHeld[this.controls.up] && this.isGrounded) {
+    if (isKeyHeld("up") && this.isGrounded) {
       this.yVel -= this.jump;
     }
 
