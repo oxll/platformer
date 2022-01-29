@@ -1,3 +1,16 @@
+/*
+  TO-DO LIST:
+    * allow for movement of player via WASD 
+    * change lava so that it is slightly translucent
+    * fix collision system
+    * add ability to swim in lava (but slower compared to in water)
+    * add damage animation to player and have it occur when player is in lava
+    * decide whether to add health bar, and make it so that damage actually occurs when player is in lava
+    * have lava spew lava particles that deal a very small amount of damage
+    * make player deaths and respawning possible
+    * allow for saving the game to be possible
+*/
+
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
@@ -6,7 +19,7 @@ let sHeight = canvas.height;
 
 const context = canvas.getContext("2d");
 
-const keysHeld = {};
+let keysHeld = {};
 
 window.addEventListener("keydown", (event) => (keysHeld[event.key] = true));
 window.addEventListener("keyup", (event) => delete keysHeld[event.key]);
@@ -51,91 +64,11 @@ function tick() {
   player.update();
   player.render();
   platforms.forEach((platform) => platform.render());
-
+  waters.forEach((water) => handleSwimming(water, player));
+  waters.forEach((water) => water.render());
+  lavas.forEach((lava) => handleBurning(lava, player));
+  lavas.forEach((lava) => lava.render());
   requestAnimationFrame(tick);
-}
-
-class Player {
-  constructor(x, y, width, height, controls, color) {
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-    this.controls = controls;
-    this.color = color;
-    this.xVel = 0;
-    this.yVel = 0;
-    this.glide = 0.5;
-    this.maxXVel = 5;
-    this.jump = 9;
-    this.gravity = 0.625;
-    this.terminalVel = 12;
-    this.isGrounded = false;
-    this.swimming = false;
-  }
-
-  update() {
-    if (keysHeld[this.controls.moveLeft]) {
-      this.xVel -= 0.5;
-    }
-
-    if (keysHeld[this.controls.moveRight]) {
-      this.xVel += 0.5;
-    }
-
-    if (keysHeld[this.controls.moveUp] && this.isGrounded) {
-      this.yVel -= this.jump;
-    }
-
-    const deaccelerator = this.isGrounded ? 1.25 : 1.125;
-
-    this.isGrounded = false;
-
-    if (this.xVel > this.maxXVel) {
-      this.xVel = this.maxXVel;
-    } else if (this.xVel < -this.maxXVel) {
-      this.xVel = -this.maxXVel;
-    }
-
-    if (this.yVel > this.terminalVel) {
-      this.yVel = this.terminalVel;
-    }
-
-    platforms.forEach((platform) => handleCollisions(this, platform));
-
-    this.x += this.xVel;
-
-    this.y += this.yVel;
-
-    this.xVel /= deaccelerator;
-
-    this.yVel += this.gravity;
-
-    if (this.y > sHeight - 100) {
-      this.y = sHeight - 100;
-      this.yVel = 0;
-      this.isGrounded = true;
-    }
-  }
-
-  render() {
-    context.fillStyle = this.color;
-    rect(this.x, this.y, this.width, this.height);
-  }
-}
-
-class Platform {
-  constructor(x, y, width, height) {
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-  }
-
-  render() {
-    context.fillStyle = "#333333";
-    rect(this.x, this.y, this.width, this.height);
-  }
 }
 
 function handleCollisions(player, platform) {
@@ -162,10 +95,59 @@ function handleCollisions(player, platform) {
   }
 }
 
-var platforms = [
-  new Platform(sWidth / 2, sHeight - 150, sWidth / 2, 50),
+function handleSwimming(water, player) {
+  if (isInHitbox(player.x, player.y, water)) {
+    player.gravity = 0;
+    player.isGrounded = false;
+    player.yVel = 1;
+
+    let playerSpeed = 1;
+    if (keysHeld[player.controls.left]) {
+      player.xVel = -playerSpeed;
+    }
+    if (keysHeld[player.controls.right]) {
+      player.xVel = playerSpeed;
+    }
+    if (keysHeld[player.controls.up]) {
+      player.yVel = -playerSpeed;
+    }
+    if (keysHeld[player.controls.down]) {
+      player.yVel = playerSpeed * 2;
+    }
+  } else {
+    player.gravity = 0.625;
+  }
+}
+
+function handleBurning(lava, player) {
+  /*
+    update(players) {
+    for (var i = 0; i < players.length; i++) {
+      if (collide(this, players[i]) && !players[i].dead) {
+        players[i].health -= 5;
+        screenColor = [255, 0, 0]; // red transparent screen
+        transparency = 50;
+      }
+    }
+  }
+  */
+}
+
+let platforms = [
+  // base platform
+  new Platform(sWidth / 2, sHeight - 150, sWidth, 10),
+
+  // walls
+  new Platform(50, sHeight / 2, 10, sHeight),
+  new Platform(sWidth - 50, sHeight / 2, 10, sHeight),
+
+  // additional platform
   new Platform(sWidth * 0.25, sHeight - 200, sWidth / 3, 10),
 ];
+
+let waters = [new Water(sWidth / 2, sHeight - 200, 50, 50)];
+
+let lavas = [new Lava(sWidth / 2 + 100, sHeight - 200, 50, 50)];
 
 let player = new Player(
   sWidth / 2,
@@ -173,10 +155,10 @@ let player = new Player(
   25,
   25,
   {
-    moveLeft: "ArrowLeft",
-    moveRight: "ArrowRight",
-    moveUp: "ArrowUp",
-    moveDown: "ArrowDown",
+    left: "ArrowLeft",
+    right: "ArrowRight",
+    up: "ArrowUp",
+    down: "ArrowDown",
   },
   "#000000"
 );
