@@ -1,14 +1,10 @@
 /*
   TO-DO LIST:
-    * allow for movement of player via WASD 
-    * change lava so that it is slightly translucent
-    * fix collision system
-    * add ability to swim in lava (but slower compared to in water)
+    * FIX COLLISION SYSTEM
     * add damage animation to player and have it occur when player is in lava
-    * decide whether to add health bar, and make it so that damage actually occurs when player is in lava
     * have lava spew lava particles that deal a very small amount of damage
-    * make player deaths and respawning possible
     * allow for saving the game to be possible
+    * side-scrolling
 */
 
 canvas.width = window.innerWidth;
@@ -65,13 +61,17 @@ function checkSide(staticValue, dynamicValue, isYStatic, hitbox) {
 
 function tick() {
   context.clearRect(0, 0, sWidth, sHeight);
-  player.update();
-  player.render();
+  if (!player.isDead) {
+    player.update();
+    player.render();
+    waters.forEach((water) => handleSwimming(water, player));
+    lavas.forEach((lava) => handleBurning(lava, player));
+  }
+  player.renderHealthBar();
   platforms.forEach((platform) => platform.render());
-  waters.forEach((water) => handleSwimming(water, player));
   waters.forEach((water) => water.render());
-  lavas.forEach((lava) => handleBurning(lava, player));
   lavas.forEach((lava) => lava.render());
+  spikes.forEach((spike) => spike.render());
   requestAnimationFrame(tick);
 }
 
@@ -129,6 +129,7 @@ function handleBurning(lava, player) {
     player.isGrounded = false;
     let playerSpeed = 0.375;
     player.yVel = playerSpeed;
+    player.health -= 10;
 
     if (isKeyHeld("left")) {
       player.xVel = -playerSpeed;
@@ -145,17 +146,6 @@ function handleBurning(lava, player) {
   } else {
     player.gravity = 0.625;
   }
-  /*
-    update(players) {
-    for (var i = 0; i < players.length; i++) {
-      if (collide(this, players[i]) && !players[i].dead) {
-        players[i].health -= 5;
-        screenColor = [255, 0, 0]; // red transparent screen
-        transparency = 50;
-      }
-    }
-  }
-  */
 }
 
 let platforms = [
@@ -173,6 +163,8 @@ let platforms = [
 let waters = [new Water(sWidth / 3 + 250, sHeight - 500, 375, 750)];
 
 let lavas = [new Lava(2 * (sWidth / 3) + 250, sHeight - 500, 375, 750)];
+
+let spikes = [new Spike(sWidth / 3 + 250, sHeight - 500, 25, 25)];
 
 let player = new Player(
   sWidth / 2,

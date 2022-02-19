@@ -9,7 +9,7 @@ class Lava {
 
   render() {
     const oscillation = Math.sin(Date.now() / 1375) ** 2 * 62.5;
-    context.fillStyle = `rgba(255, ${100 + oscillation}, 0, 0.9625)`;
+    context.fillStyle = `rgba(255, ${oscillation + 100}, 0, 0.9625)`;
     rect(this.x, this.y, this.width, this.height);
   }
 }

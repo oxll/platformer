@@ -2,6 +2,8 @@ class Player {
   constructor(x, y, width, height, controls, color) {
     this.x = x;
     this.y = y;
+    this.spawnX = x;
+    this.spawnY = y;
     this.width = width;
     this.height = height;
     this.controls = controls;
@@ -14,7 +16,8 @@ class Player {
     this.gravity = 0.625;
     this.terminalVel = 12;
     this.isGrounded = false;
-    this.swimming = false;
+    this.health = 1000;
+    this.isDead = false;
   }
 
   update() {
@@ -53,10 +56,39 @@ class Player {
     this.xVel /= deaccelerator;
 
     this.yVel += this.gravity;
+
+    if (this.health <= 0) {
+      this.isDead = true;
+      setTimeout(() => {
+        this.isDead = false;
+        this.health = 1000;
+        this.x = this.spawnX;
+        this.y = this.spawnY;
+      }, 2000);
+    }
+
+    if (this.health > 1000) {
+      this.health = 1000;
+    }
   }
 
   render() {
     context.fillStyle = this.color;
     rect(this.x, this.y, this.width, this.height);
+  }
+
+  renderHealthBar() {
+    context.fillStyle = `hsl(${this.health * 0.11}, 50%, 37.5%)`;
+    context.fillRect(sWidth / 5 - 250, sHeight / 16, 455, 15);
+    if (this.isDead) {
+      return;
+    }
+    context.fillStyle = `hsl(${this.health * 0.11}, 75%, 50%)`;
+    context.fillRect(
+      sWidth / 5 - 247.5,
+      sHeight / 16 + 2.5,
+      this.health * 0.45,
+      10
+    );
   }
 }
