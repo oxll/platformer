@@ -44,20 +44,11 @@ function isInHitbox(x, y, hitbox) {
   );
 }
 
-function checkSide(staticValue, dynamicValue, isYStatic, hitbox) {
-  const SPACING = player.width * 0.3;
-  let points = [
-    [staticValue, dynamicValue],
-    [staticValue, dynamicValue + SPACING],
-    [staticValue, dynamicValue - SPACING],
-  ];
-
-  if (isYStatic) {
-    points = points.map((point) => point.reverse());
-  }
-
-  return points.some((point) => isInHitbox(...point, hitbox));
+if (isYStatic) {
+  points = points.map((point) => point.reverse());
 }
+
+return points.some((point) => isInHitbox(...point, hitbox));
 
 function tick() {
   context.clearRect(0, 0, sWidth, sHeight);
@@ -67,6 +58,7 @@ function tick() {
     waters.forEach((water) => handleSwimming(water, player));
     lavas.forEach((lava) => handleBurning(lava, player));
   }
+  player.handleCollisions(playerX, playerY, platforms);
   player.renderHealthBar();
   platforms.forEach((platform) => platform.render());
   spikes.forEach((spike) => spike.render());
