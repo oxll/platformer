@@ -1,3 +1,9 @@
+const states = {
+  NOT_RUNNING: 0,
+  TURNING_RED: 1,
+  TURNING_BLACK: 2,
+};
+
 class Player {
   constructor(x, y, width, height, controls, color) {
     this.x = x;
@@ -18,6 +24,8 @@ class Player {
     this.isGrounded = false;
     this.health = 1000;
     this.isDead = false;
+    this.state = states.NOT_RUNNING;
+    this.animationTransitionValue = 0;
   }
 
   update() {
@@ -51,11 +59,17 @@ class Player {
 
     this.y += this.yVel;
 
-    platforms.forEach((platform) => handleCollisions(this, platform));
+    platforms.forEach((platform) => handleCollisions(this.x, this.y, platform));
 
     this.xVel /= deaccelerator;
 
     this.yVel += this.gravity;
+
+    function tickDamageAnimation() {
+      if (this.state === states.TURNING_RED) {
+        this.animationTransitionValue += 0.1;
+      }
+    }
 
     if (this.health <= 0) {
       this.isDead = true;

@@ -69,33 +69,35 @@ function tick() {
   }
   player.renderHealthBar();
   platforms.forEach((platform) => platform.render());
+  spikes.forEach((spike) => spike.render());
   waters.forEach((water) => water.render());
   lavas.forEach((lava) => lava.render());
-  spikes.forEach((spike) => spike.render());
   requestAnimationFrame(tick);
 }
 
-function handleCollisions(player, platform) {
-  // checks left
-  if (checkSide(player.x - player.width / 2, player.y, false, platform)) {
-    player.x = platform.x + platform.width / 2 + player.width / 2;
-    player.xVel = 0;
-  }
-  // checks right
-  if (checkSide(player.x + player.width / 2, player.y, false, platform)) {
-    player.x = platform.x - platform.width / 2 - player.width / 2;
-    player.xVel = 0;
-  }
-  // checks top
-  if (checkSide(player.y - player.height / 2, player.x, true, platform)) {
-    player.y = platform.y + platform.height / 2 + player.height / 2;
-    player.yVel = 0;
-  }
-  // checks bottom
-  if (checkSide(player.y + player.height / 2, player.x, true, platform)) {
-    player.y = platform.y - platform.height / 2 - player.height / 2;
-    player.yVel = 0;
-    player.isGrounded = true;
+function handleCollisions(playerX, playerY, platform) {
+  if (isInHitbox(playerX, playerY, platform)) {
+    // checks for left side of player
+    if (player.xVel < 0) {
+      player.x = platform.x + platform.width / 2 + player.width / 2;
+      player.xVel = 0;
+    }
+    // checks for right side of player
+    if (checkSide(player.xVel > 0)) {
+      player.x = platform.x - platform.width / 2 - player.width / 2;
+      player.xVel = 0;
+    }
+    // checks for top side of player
+    if (checkSide(player.yVel < 0)) {
+      player.y = platform.y + platform.height / 2 + player.height / 2;
+      player.yVel = 0;
+    }
+    // checks for bottom side of player
+    if (checkSide(player.yVel > 0)) {
+      player.y = platform.y - platform.height / 2 - player.height / 2;
+      player.yVel = 0;
+      player.isGrounded = true;
+    }
   }
 }
 
@@ -164,7 +166,7 @@ let waters = [new Water(sWidth / 3 + 250, sHeight - 500, 375, 750)];
 
 let lavas = [new Lava(2 * (sWidth / 3) + 250, sHeight - 500, 375, 750)];
 
-let spikes = [new Spike(sWidth / 3 + 250, sHeight - 500, 25, 25)];
+let spikes = [new Spike(sWidth / 3 + 250, sHeight - 500, 25, 1)];
 
 let player = new Player(
   sWidth / 2,

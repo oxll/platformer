@@ -1,9 +1,9 @@
 class Spike {
-  constructor(x, y, width, height) {
+  constructor(x, y, width, heightMultiplier) {
     this.x = x;
     this.y = y;
     this.width = width;
-    this.height = height;
+    this.height = heightMultiplier * (this.width / 2) * Math.sqrt(3);
   }
 
   render() {
