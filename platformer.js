@@ -83,17 +83,17 @@ function handleCollisions(playerX, playerY, platform) {
       player.xVel = 0;
     }
     // checks for right side of player
-    if (checkSide(player.xVel > 0)) {
+    if (player.xVel > 0) {
       player.x = platform.x - platform.width / 2 - player.width / 2;
       player.xVel = 0;
     }
     // checks for top side of player
-    if (checkSide(player.yVel < 0)) {
+    if (player.yVel < 0) {
       player.y = platform.y + platform.height / 2 + player.height / 2;
       player.yVel = 0;
     }
     // checks for bottom side of player
-    if (checkSide(player.yVel > 0)) {
+    if (player.yVel > 0) {
       player.y = platform.y - platform.height / 2 - player.height / 2;
       player.yVel = 0;
       player.isGrounded = true;
